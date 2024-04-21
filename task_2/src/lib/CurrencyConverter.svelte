@@ -1,50 +1,49 @@
 <script lang="ts">
+  import { fetchExchangeRate } from "../untils/helperFunctions";
+  import InputCurrency from "./InputCurrency.svelte";
   import SelectCurrency from "./SelectCurrency.svelte";
 
-  let baseCurrency: string = 'USD';
-  let targetCurrency: string = 'EUR';
+  let baseCurrency: string = "USD";
+  let targetCurrency: string = "EUR";
   let baseAmount: number = 0;
   let targetAmount: number = 0;
-
-  async function fetchExchangeRate(base: string, target: string): Promise<number> {
-    const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`);
-    const data = await response.json();
-    return data.rates[target];
-  }
-
-  async function convertCurrency() {
-    const rate = await fetchExchangeRate(baseCurrency, targetCurrency);
-    targetAmount = Number((baseAmount * rate).toFixed(2));
-  }
+  let isError = false;
+  let errorMessage = "The number cannot be negative.";
 
   const handleChangeBaseCurrency = (e: Event) => {
     baseCurrency = (e.target as HTMLSelectElement).value;
-    convertCurrency();
+    handleConvertBaseAmount(baseAmount);
   };
 
   const handleChangeTargetCurrency = (e: Event) => {
     targetCurrency = (e.target as HTMLSelectElement).value;
-    convertCurrency();
+    handleConvertTargetAmount(targetAmount);
   };
 
-  const handleConvertBaseAmount = async () => {
+  const handleConvertBaseAmount = async (baseAmount: number) => {
     const rate = await fetchExchangeRate(baseCurrency, targetCurrency);
     targetAmount = Number((baseAmount * rate).toFixed(2));
-  }
+  };
 
-  const handleConvertTargetAmount = async () => {
+  const handleConvertTargetAmount = async (targetAmount: number) => {
     const rate = await fetchExchangeRate(targetCurrency, baseCurrency);
     baseAmount = Number((targetAmount * rate).toFixed(2));
-  }
+  };
+
 </script>
 
 <div class="converter">
-  <label class="converter__amount">
-    Base Currency:
-    <input type="number" bind:value={baseAmount} on:input={handleConvertBaseAmount}/>
-    Amount:
-    <input type="number" bind:value={targetAmount} on:input={handleConvertTargetAmount}/>
-  </label>
+  <InputCurrency
+    name="Base Currency:"
+    currentValue={baseAmount}
+    onChange={handleConvertBaseAmount}
+  />
+
+  <InputCurrency
+    name="Amount:"
+    currentValue={targetAmount}
+    onChange={handleConvertTargetAmount}
+  />
 
   <SelectCurrency
     name="Base Currency:"
@@ -70,11 +69,6 @@
     padding: 10px;
     border-radius: 15px;
     background-color: var(--color-light);
-    box-shadow: 0px 0px 50px -20px var(--color-light)
-  }
-
-  .converter__amount > input {
-    padding: 5px;
-    border-radius: 5px;
+    box-shadow: 0px 0px 50px -20px var(--color-light);
   }
 </style>
