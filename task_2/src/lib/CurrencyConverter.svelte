@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { fetchExchangeRate } from "../untils/helperFunctions";
   import InputCurrency from "./InputCurrency.svelte";
   import SelectCurrency from "./SelectCurrency.svelte";
+  import { fetchExchangeRate } from '../until/helperFunctions';
 
   let baseCurrency: string = "USD";
   let targetCurrency: string = "EUR";
   let baseAmount: number = 0;
   let targetAmount: number = 0;
-  let isError = false;
-  let errorMessage = "The number cannot be negative.";
 
   const handleChangeBaseCurrency = (e: Event) => {
     baseCurrency = (e.target as HTMLSelectElement).value;
@@ -22,16 +20,25 @@
 
   const handleConvertBaseAmount = async (baseAmount: number) => {
     const rate = await fetchExchangeRate(baseCurrency, targetCurrency);
-    targetAmount = Number((baseAmount * rate).toFixed(2));
+    if (baseAmount < 0) {
+      baseAmount = 0
+      targetAmount = Number((baseAmount * rate).toFixed(2));
+    } else {
+      targetAmount = Number((baseAmount * rate).toFixed(2));
+    }
   };
 
   const handleConvertTargetAmount = async (targetAmount: number) => {
     const rate = await fetchExchangeRate(targetCurrency, baseCurrency);
-    baseAmount = Number((targetAmount * rate).toFixed(2));
+    if (targetAmount < 0) {
+      targetAmount = 0
+      baseAmount = Number((baseAmount * rate).toFixed(2));
+    } else {
+      baseAmount = Number((targetAmount * rate).toFixed(2));
+    }
   };
 
 </script>
-
 <div class="converter">
   <InputCurrency
     name="Base Currency:"

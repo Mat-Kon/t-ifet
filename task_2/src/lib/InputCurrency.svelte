@@ -12,7 +12,7 @@
 
 <label class="converter__amount">
   {name}
-  <input type="number" bind:value={currentValue} on:change={handleInput} />
+  <input type="number" min={0} bind:value={currentValue} on:change={handleInput} />
 </label>
 
 <style>
