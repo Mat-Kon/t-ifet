@@ -1,16 +1,13 @@
 import { encoded, translations } from './data.js'
 
-const EXCEPTIONS = ['groupId', 'service', 'formatSize', 'ca'];
-const deepCopyEncoded = JSON.parse(JSON.stringify(encoded));
+const IGNORED_KEYS = ['groupId', 'service', 'formatSize', 'ca'];
+const deepCopyEncoded = structuredClone(encoded);
 
-const getListWithTranslationValue = (encoded, translations) => {
-  if (!encoded.length) {
-    throw new Error('Encoded list is empty');
-  }
-
-  const currentList = encoded.map((encodedItem) => {
+const decode = (encoded, translations) => {
+  return encoded.map((encodedItem) => {
     for (const key in encodedItem) {
-      if (!isException(key) && hasEndId(key)) {
+
+      if (key.endsWith('Id') && IGNORED_KEYS.includes(key)) {
         const encodedValue = encodedItem[key];
         const translationsValue = translations[encodedValue];
 
@@ -21,27 +18,16 @@ const getListWithTranslationValue = (encoded, translations) => {
     }
     return encodedItem;
   });
-
-  return currentList;
 };
 
-const isException = (value) => {
-  return EXCEPTIONS.find((exceptionValue) => value === exceptionValue);
-};
-
-const hasEndId = (value) => {
-  return value.endsWith('Id');
-};
-
-
-const getUniqueGroupIds = (encoded) => {
+const getUniqueIds = (encoded) => {
   const uniqueGroupIds = new Set();
 
   encoded.forEach((item) => {
     const keys = Object.keys(item);
 
     keys.forEach((key) => {
-      if (hasEndId(key)) {
+      if (key.endsWith('Id')) {
         const value = item[key];
         if (translations[value] !== undefined && translations[value] !== '') {
           uniqueGroupIds.add(value);
@@ -53,8 +39,8 @@ const getUniqueGroupIds = (encoded) => {
   return Array.from(uniqueGroupIds);
 };
 
-const uniqueGroupIds = getUniqueGroupIds(deepCopyEncoded);
-const decoded = getListWithTranslationValue(deepCopyEncoded, translations);
+const uniqueGroupIds = getUniqueIds(deepCopyEncoded);
+const decoded = decode(deepCopyEncoded, translations);
 
 console.log("Let's rock");
 console.log(encoded, translations);
