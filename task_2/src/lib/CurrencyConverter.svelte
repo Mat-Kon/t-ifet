@@ -1,68 +1,82 @@
 <script lang="ts">
-  import InputCurrency from "./InputCurrency.svelte";
-  import SelectCurrency from "./SelectCurrency.svelte";
-  import { fetchExchangeRate } from '../until/helperFunctions';
+  import { fetchExchangeRate } from "../until/helperFunctions";
 
   let baseCurrency: string = "USD";
   let targetCurrency: string = "EUR";
   let baseAmount: number = 0;
   let targetAmount: number = 0;
 
-  const handleChangeBaseCurrency = (e: Event) => {
-    baseCurrency = (e.target as HTMLSelectElement).value;
-    handleConvertBaseAmount(baseAmount);
-  };
-
-  const handleChangeTargetCurrency = (e: Event) => {
-    targetCurrency = (e.target as HTMLSelectElement).value;
-    handleConvertTargetAmount(targetAmount);
-  };
-
-  const handleConvertBaseAmount = async (baseAmount: number) => {
+  const handleConvertBaseAmount = async () => {
     const rate = await fetchExchangeRate(baseCurrency, targetCurrency);
     if (baseAmount < 0) {
-      baseAmount = 0
+      baseAmount = 0;
       targetAmount = Number((baseAmount * rate).toFixed(2));
     } else {
       targetAmount = Number((baseAmount * rate).toFixed(2));
     }
   };
 
-  const handleConvertTargetAmount = async (targetAmount: number) => {
+  const handleConvertTargetAmount = async () => {
     const rate = await fetchExchangeRate(targetCurrency, baseCurrency);
     if (targetAmount < 0) {
-      targetAmount = 0
+      targetAmount = 0;
       baseAmount = Number((baseAmount * rate).toFixed(2));
     } else {
       baseAmount = Number((targetAmount * rate).toFixed(2));
     }
   };
 
+  const handleChangeBaseCurrency = (e: Event) => {
+    const newValue = (e.target as HTMLSelectElement).value;
+    baseCurrency = newValue;
+    handleConvertBaseAmount();
+  };
+
+  const handleChangeTargetCurrency = (e: Event) => {
+    const newValue = (e.target as HTMLSelectElement).value;
+    targetCurrency = newValue;
+    handleConvertTargetAmount();
+  };
 </script>
+
 <div class="converter">
-  <InputCurrency
-    name="Base Currency:"
-    currentValue={baseAmount}
-    onChange={handleConvertBaseAmount}
-  />
+  <label class="converter__amount">
+    Base Currency:
+    <input
+      type="number"
+      min={0}
+      bind:value={baseAmount}
+      on:change={handleConvertBaseAmount}
+    />
+  </label>
 
-  <InputCurrency
-    name="Amount:"
-    currentValue={targetAmount}
-    onChange={handleConvertTargetAmount}
-  />
+  <label class="converter__amount">
+    Amount:
+    <input
+      type="number"
+      min={0}
+      bind:value={targetAmount}
+      on:change={handleConvertTargetAmount}
+    />
+  </label>
 
-  <SelectCurrency
-    name="Base Currency:"
-    currentValue={baseCurrency}
-    handleChange={handleChangeBaseCurrency}
-  />
+  <label class="converter__currency">
+    Base Currency:
+    <select bind:value={baseCurrency} on:change={handleChangeBaseCurrency}>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+    </select>
+  </label>
 
-  <SelectCurrency
-    name="Target Currency:"
-    currentValue={targetCurrency}
-    handleChange={handleChangeTargetCurrency}
-  />
+  <label class="converter__currency">
+    Target Currency:
+    <select bind:value={targetCurrency} on:change={handleChangeTargetCurrency}>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+    </select>
+  </label>
 </div>
 
 <style>
@@ -77,5 +91,10 @@
     border-radius: 15px;
     background-color: var(--color-light);
     box-shadow: 0px 0px 50px -20px var(--color-light);
+  }
+
+  .converter__amount > input, .converter__currency > select{
+    border-radius: 5px;
+    padding: 5px;
   }
 </style>
