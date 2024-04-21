@@ -7,7 +7,7 @@ const decode = (encoded, translations) => {
   return encoded.map((encodedItem) => {
     for (const key in encodedItem) {
 
-      if (key.endsWith('Id') && IGNORED_KEYS.includes(key)) {
+      if (key.endsWith('Id') && !IGNORED_KEYS.includes(key)) {
         const encodedValue = encodedItem[key];
         const translationsValue = translations[encodedValue];
 
